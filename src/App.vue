@@ -2,60 +2,83 @@
   <v-app>
     <v-app-bar
       app
-      color="primary"
+      color="rgb(18, 22, 120)"
       dark
+      class="px-10"
+      elevate-on-scroll
     >
       <div class="d-flex align-center">
-        <v-img
-          alt="Vuetify Logo"
-          class="shrink mr-2"
-          contain
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-logo-dark.png"
-          transition="scale-transition"
-          width="40"
-        />
-
-        <v-img
-          alt="Vuetify Name"
-          class="shrink mt-1 hidden-sm-and-down"
-          contain
-          min-width="100"
-          src="https://cdn.vuetifyjs.com/images/logos/vuetify-name-dark.png"
-          width="100"
-        />
+        <v-icon x-large >
+          mdi-robot
+        </v-icon>
+        <div class="ml-6 text-h4 font-weight-thin">
+          SupPORT
+        </div>
       </div>
 
       <v-spacer></v-spacer>
 
-      <v-btn
-        href="https://github.com/vuetifyjs/vuetify/releases/latest"
-        target="_blank"
-        text
+      <v-dialog
+        v-if="1"
+        transition="dialog-top-transition"
+        max-width="600"
       >
-        <span class="mr-2">Latest Release</span>
-        <v-icon>mdi-open-in-new</v-icon>
+        <template #activator="{ on, attrs }">
+          <v-btn
+            text
+            depressed
+            v-bind="attrs"
+            v-on="on"
+            class="text-none font-weight-light"
+          >
+            Login
+          </v-btn>
+        </template>
+        <template #default="dialog">
+          <login-modal @click="dialog.value = false" />
+        </template>
+      </v-dialog>
+      <v-btn
+        v-else
+        icon
+      >
+        <v-icon>mdi-export</v-icon>
       </v-btn>
     </v-app-bar>
 
     <v-main>
-      <HelloWorld/>
+      <main-page/>
     </v-main>
+    <v-footer
+      app
+      absolute
+    >
+      <v-col
+        class="text-center text-caption py-0"
+        cols="12"
+      >
+        2021
+      </v-col>
+    </v-footer>
   </v-app>
 </template>
 
 <script lang="ts">
-import Vue from 'vue';
-import HelloWorld from './components/HelloWorld.vue';
+import { Vue, Component } from 'vue-property-decorator';
+import MainPage from './components/MainPage.vue';
+import LoginModal from './components/LoginModal.vue';
 
-export default Vue.extend({
-  name: 'App',
-
+@Component({
   components: {
-    HelloWorld,
+    MainPage,
+    LoginModal,
   },
+})
 
-  data: () => ({
-    //
-  }),
-});
+export default class App extends Vue {
+  name = 'App'
+}
 </script>
+
+<style lang='scss'>
+</style>
