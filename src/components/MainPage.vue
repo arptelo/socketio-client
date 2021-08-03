@@ -1,22 +1,15 @@
 <template>
   <v-container fluid px-0>
     <v-row class="text-center mb-12">
-      <v-col cols="3" offset="3">
-        <v-img
-          src="@/assets/hero.png"
-          height="600px"
-          contain
-        />
-      </v-col>
-      <v-col cols="3" class="d-flex flex-column justify-center font-weight-black">
+      <v-col cols="3" offset="3" class="d-flex flex-column justify-center font-weight-black">
         <v-subheader class="text-h5">
-          SupPORT help center
+          Sample help center
         </v-subheader>
         <div class="hero-text text-left pl-4">
           Get assistance right now!
         </div>
         <div class="text-subtitle-1 grey--text text--darken-4 text-left pl-4 mb-8">
-          SupPORT answers your questions right on time. Start using it now.
+          Sample answers your questions right on time. Start using it now.
         </div>
         <v-btn
           color="#090b3c"
@@ -26,6 +19,13 @@
         >
           Start asking questions
         </v-btn>
+      </v-col>
+      <v-col cols="3">
+        <v-img
+          src="@/assets/hero_image.png"
+          height="600px"
+          contain
+        />
       </v-col>
     </v-row>
     <v-row class="d-flex flex-column grey lighten-4">
@@ -66,7 +66,7 @@
                   color="rgb(8, 10, 61)"
                   dense
                   readonly
-                  value="5"
+                  :value="5"
                 />
               </div>
             </div>
@@ -74,7 +74,7 @@
         </div>
       </v-col>
     </v-row>
-    <v-row class="my-8">
+    <v-row class="mt-16 mb-4">
       <v-card
         class="mx-auto text-center"
         color="rgb(8, 10, 61)"
@@ -83,10 +83,10 @@
         max-width="600"
       >
         <v-card-text>
-          <v-sheet color="rgb(12, 15, 91.5)">
+          <v-sheet color="white">
             <v-sparkline
               :value="[123, 210, 345, 475, 569]"
-              color="rgba(255, 255, 255, .7)"
+              color="rgba(25, 25, 25, .7)"
               height="100"
               padding="24"
               stroke-linecap="round"

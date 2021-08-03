@@ -24,6 +24,14 @@ module.exports = {
       env: {
         mocha: true,
       },
+      rules: {
+        'linebreak-style': ['error', 'windows'],
+        'lines-between-class-members': [
+          'error',
+          'always',
+          { exceptAfterSingleLine: true },
+        ],
+      },
     },
   ],
 };
