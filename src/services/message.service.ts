@@ -29,8 +29,14 @@ export default class MessageService {
       // this.subject.next(response);
     })
     .on('command', (response) => {
-      console.log(response);
-      this.commands.push({ isComplete: false, ...response });
+      if (this.respondedCommands.includes(response.command.type)) {
+        this.sendMessage({ author: '', message: '' }, 'command');
+      } else if (response.command.type === 'map') {
+        this.respondedCommands.push('map');
+        this.messages.push(response);
+      } else {
+        this.commands.push({ isComplete: false, ...response });
+      }
     });
 
   messages: Array<{ author: string; message: string;}> = []
@@ -38,6 +44,8 @@ export default class MessageService {
   commands: Array<{ isComplete:boolean, author: string; command:
     { type: 'date'; data: string }|{ type: 'map'; data: { lat: number; lng: number; } }|
     { type: 'rate'; data: Array<number> }|{ type: 'complete'; data: Array<string> };}> = []
+
+  respondedCommands: Array<string> = []
 
   connect(): void {
     this.socket.connect();

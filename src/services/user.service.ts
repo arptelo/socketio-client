@@ -18,6 +18,7 @@ export default class UserService {
   }
 
   logout(): void {
+    this.username = '';
     this.isUserLoggedIn = false;
   }
 }

@@ -1,5 +1,11 @@
 <template>
   <div class="chat-window-container">
+    <v-overlay
+      :value="overlay"
+      absolute
+    >
+      Your conversation ended.
+    </v-overlay>
     <div
       class="message-box d-flex flex-column"
       :style="{'max-height': boxVisibility}"
@@ -11,27 +17,43 @@
       <div class="d-flex flex-column message-box-content flex-grow-1">
         <div
           v-for="(message, index) in messages"
-          :key="index"
-          class="talk-bubble tri-right ma-2"
-          :class="message.author === userService.username
-            ? 'left-top white mr-8 ml-6'
-            : 'right-top color_chat_bubble mr-8 align-self-end'"
+          :key="'message' + index"
+          class="d-flex flex-column"
         >
-          <div class="talktext pa-3 text-body-2">
-            <p>
-              <span class="font-weight-bold">
-                {{ message.author }}:
-              </span>
-              <br />
-              <span class="font-weight-light">
-                {{message.message }}
-              </span>
-            </p>
+          <div v-if="message.command">
+            <div class="text-center ma-2 mr-7 pa-1 pl-3 white rounded-lg">
+              This is where you can find it:
+            </div>
+            <v-img
+              :src="`https://www.mapquestapi.com/staticmap/v5/map?locations=${message.command.data.lat},${message.command.data.lng}&size=200,200&key=${apiKey}`"
+              height="200"
+              class="ma-2"
+              contain
+            />
+          </div>
+          <div
+            v-else
+            class="talk-bubble tri-right ma-2"
+            :class="message.author === userService.username
+              ? 'left-top white ml-6'
+              : 'right-top color_chat_bubble mr-8 align-self-end'"
+          >
+            <div class="talktext pa-3 text-body-2">
+              <p>
+                <span class="font-weight-bold">
+                  {{ message.author }}:
+                </span>
+                <br />
+                <span class="font-weight-light">
+                  {{message.message }}
+                </span>
+              </p>
+            </div>
           </div>
         </div>
         <div
           v-for="(command, index) in commands"
-          :key="index"
+          :key="'command' + index"
         >
           <template v-if="!command.isComplete">
             <div v-if="command.command.type === 'date'">
@@ -40,7 +62,7 @@
               </div>
               <v-btn
                 v-for="(i, j) in Array(5)"
-                :key="j"
+                :key="'date' + j"
                 class="ma-2 text-none text-caption"
                 width="70px"
                 @click="fullfillCommandAndSendMessage(index,
@@ -49,26 +71,13 @@
                 {{ days[(new Date(command.command.data).getDay() + j) % 7] }}
               </v-btn>
             </div>
-            <div v-if="command.command.type === 'map'">
-              <div class="text-center ma-2 mr-7 pa-1 pl-3 white rounded-lg">
-                This is where you can find it:
-              </div>
-              <v-img
-                :src="'https://static-maps.yandex.ru/1.x/?lang=en-US&ll=' +
-                  command.command.data.lat + ',' + command.command.data.lng +
-                  '&z=13&l=map&size=400,200&pt=' + command.command.data.lat +
-                  ',' + command.command.data.lng + ',pm2dbm'"
-                class="ma-2"
-                contain
-              />
-            </div>
-            <div v-if="command.command.type === 'rate'">
+            <div v-else-if="command.command.type === 'rate'">
               <div class="text-center ma-2 mr-7 pa-1 pl-3 white rounded-lg">
                 Please rate your experience:
               </div>
               <v-btn
                 v-for="(i, j) in Array(command.command.data[1] - command.command.data[0] + 1)"
-                :key="j"
+                :key="'rate' + j"
                 class="ma-2 text-none text-caption"
                 width="70px"
                 @click="fullfillCommandAndSendMessage(index, command.command.data[0] + j)"
@@ -76,13 +85,13 @@
                 {{ command.command.data[0] + j }}
               </v-btn>
             </div>
-            <div v-if="command.command.type === 'complete'">
+            <div v-else-if="command.command.type === 'complete'">
               <div class="text-center ma-2 mr-7 pa-1 pl-3 white rounded-lg">
                 Do you want to close this conversation?:
               </div>
               <v-btn
                 v-for="(i, j) in Array(2)"
-                :key="j"
+                :key="'complete' + j"
                 class="ma-2 text-none text-caption"
                 width="70px"
                 @click="fullfillCommandAndSendMessage(index, ['Yes', 'No'][j])"
@@ -107,12 +116,22 @@
           no-resize
           placeholder="Type your message here..."
         />
-        <v-img
-          src="@/assets/send.svg"
+        <v-btn
           class="send-icon"
+          icon
+          large
+          fab
+          :disabled="!this.currentMessage"
           title="Send message"
           @click="sendMessage('message')"
-        />
+        >
+          <v-icon
+            large
+            color="rgb(118, 163, 212)"
+          >
+            mdi-send
+          </v-icon>
+        </v-btn>
         <div class="action-buttons-container px-1">
           <v-btn
             icon
@@ -151,6 +170,8 @@ import MessageService from '../services/message.service';
 export default class ChatWindow extends Vue {
   name = 'ChatWindow'
 
+  overlay = false
+
   boxVisibility = '0';
 
   iconOffset = '20px';
@@ -162,6 +183,8 @@ export default class ChatWindow extends Vue {
   currentMessage = ''
 
   days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+  apiKey = process.env.VUE_APP_STATIC_MAP_API_KEY
 
   @Inject('$userService')
   userService!: UserService
@@ -190,6 +213,7 @@ export default class ChatWindow extends Vue {
     this.iconOffset = this.iconOffset === '20px' ? '505px' : '20px';
     this.headerHeight = this.headerHeight === '0' ? '60px' : '0';
     this.editorVisibility = this.editorVisibility === 'hidden' ? 'visible' : 'hidden';
+    if (this.boxVisibility === '600px' && this.overlay) setTimeout(this.toggleDisplay, 2000);
   }
 
   sendMessage(type = 'message', body = ''): void {
@@ -204,7 +228,13 @@ export default class ChatWindow extends Vue {
 
   fullfillCommandAndSendMessage(commandIndex: number, widgetMessage: string): void {
     this.messageService.commands[commandIndex].isComplete = true;
+    const commandType = this.messageService.commands[commandIndex].command.type;
+    if (commandType !== 'complete') this.messageService.respondedCommands.push(commandType);
     this.sendMessage('message', widgetMessage);
+    if (widgetMessage === 'Yes') {
+      this.overlay = true;
+      setTimeout(this.toggleDisplay, 2000);
+    }
   }
 }
 </script>
@@ -285,8 +315,8 @@ export default class ChatWindow extends Vue {
       .send-icon {
         position: absolute;
         right: 30px;
-        bottom: 38px;
-        cursor: pointer;
+        bottom: 30px;
+        transform: rotate(-45deg);
       }
     }
     .action-buttons-container {

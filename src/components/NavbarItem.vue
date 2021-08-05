@@ -16,11 +16,11 @@
 
     <v-spacer></v-spacer>
 
-    <div
+    <a
       v-for="menuItem in navigationMenu"
       :key="menuItem"
       v-text="menuItem"
-      class="navigation-menu-item mr-16"
+      class="navigation-menu-item black--text mr-16"
     />
 
     <v-dialog

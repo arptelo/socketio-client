@@ -12,7 +12,7 @@
           Sample answers your questions right on time. Start using it now.
         </div>
         <v-btn
-          color="#090b3c"
+          color="rgb(118, 163, 212)"
           class="text-body-1 text-none white--text ml-4"
           width="200px"
           large
@@ -77,9 +77,10 @@
     <v-row class="mt-16 mb-4">
       <v-card
         class="mx-auto text-center"
-        color="rgb(8, 10, 61)"
+        color="white"
         dark
         width="600"
+        elevation="0"
         max-width="600"
       >
         <v-card-text>
@@ -100,7 +101,7 @@
         </v-card-text>
 
         <v-card-text>
-          <div class="text-h6 font-weight-thin">
+          <div class="text-h6 black--text font-weight-bold">
             Join increasing number of satisfied customers
           </div>
         </v-card-text>
@@ -123,7 +124,7 @@ export default class MainPage extends Vue {
     { name: 'Bender Bending Rodriguez', title: '"Bite my shiny metal axe. This is definitely 30th century thing."', url: 'https://robohash.org/omnisestvel.png?size=100x100&set=set1' },
     { name: 'Lieutenant Data', title: '"It is like using an alien technology. All parameters are within normal limits."', url: 'https://robohash.org/voluptatedelenitianimi.bmp?size=100x100&set=set1' },
     { name: 'Robocop', title: '"It is like talking to a real robot! It is like going to good old days."', url: 'https://robohash.org/minimasequiconsectetur.png?size=100x100&set=set1' },
-    { name: 'Rosie', title: '"The chatbot was very friendly and helpful. I suggest it to everybody who does not have a life."', url: 'https://robohash.org/repellatsintmolestiae.jpg?size=100x100&set=set1' },
+    { name: 'GPT-3', title: '"AI will not take over world. Just relax and enjoy your lives."', url: 'https://robohash.org/repellatsintmolestiae.jpg?size=100x100&set=set1' },
   ]
 }
 </script>
@@ -131,7 +132,6 @@ export default class MainPage extends Vue {
 <style lang='scss' scoped>
 .hero-text {
   font-size: 45px;
-  color: #080a3d;
   line-height: 50px;
   text-align: left;
 }

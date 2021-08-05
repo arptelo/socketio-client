@@ -19,7 +19,7 @@
           Welcome back
         </div>
         <div class="text-h5 white--text font-weight-light mt-2">
-          To continue log in to Sample
+          To continue, log in to Sample
         </div>
         <v-text-field
           v-model="username"
@@ -51,6 +51,7 @@
           required
           rounded
           single-line
+          type="password"
         />
 
         <v-btn
