@@ -8,14 +8,97 @@
         class="message-box-header"
         :style="{'max-height': headerHeight}"
       />
-      <div
-        class="message-box-content flex-grow-1"
-      />
+      <div class="d-flex flex-column message-box-content flex-grow-1">
+        <div
+          v-for="(message, index) in messages"
+          :key="index"
+          class="talk-bubble tri-right ma-2"
+          :class="message.author === userService.username
+            ? 'left-top white mr-8 ml-6'
+            : 'right-top color_chat_bubble mr-8 align-self-end'"
+        >
+          <div class="talktext pa-3 text-body-2">
+            <p>
+              <span class="font-weight-bold">
+                {{ message.author }}:
+              </span>
+              <br />
+              <span class="font-weight-light">
+                {{message.message }}
+              </span>
+            </p>
+          </div>
+        </div>
+        <div
+          v-for="(command, index) in commands"
+          :key="index"
+        >
+          <template v-if="!command.isComplete">
+            <div v-if="command.command.type === 'date'">
+              <div class="text-center ma-2 mr-7 pa-1 pl-3 white rounded-lg">
+                Please choose a date:
+              </div>
+              <v-btn
+                v-for="(i, j) in Array(5)"
+                :key="j"
+                class="ma-2 text-none text-caption"
+                width="70px"
+                @click="fullfillCommandAndSendMessage(index,
+                  days[(new Date(command.command.data).getDay() + j) % 7])"
+              >
+                {{ days[(new Date(command.command.data).getDay() + j) % 7] }}
+              </v-btn>
+            </div>
+            <div v-if="command.command.type === 'map'">
+              <div class="text-center ma-2 mr-7 pa-1 pl-3 white rounded-lg">
+                This is where you can find it:
+              </div>
+              <v-img
+                :src="'https://static-maps.yandex.ru/1.x/?lang=en-US&ll=' +
+                  command.command.data.lat + ',' + command.command.data.lng +
+                  '&z=13&l=map&size=400,200&pt=' + command.command.data.lat +
+                  ',' + command.command.data.lng + ',pm2dbm'"
+                class="ma-2"
+                contain
+              />
+            </div>
+            <div v-if="command.command.type === 'rate'">
+              <div class="text-center ma-2 mr-7 pa-1 pl-3 white rounded-lg">
+                Please rate your experience:
+              </div>
+              <v-btn
+                v-for="(i, j) in Array(command.command.data[1] - command.command.data[0] + 1)"
+                :key="j"
+                class="ma-2 text-none text-caption"
+                width="70px"
+                @click="fullfillCommandAndSendMessage(index, command.command.data[0] + j)"
+              >
+                {{ command.command.data[0] + j }}
+              </v-btn>
+            </div>
+            <div v-if="command.command.type === 'complete'">
+              <div class="text-center ma-2 mr-7 pa-1 pl-3 white rounded-lg">
+                Do you want to close this conversation?:
+              </div>
+              <v-btn
+                v-for="(i, j) in Array(2)"
+                :key="j"
+                class="ma-2 text-none text-caption"
+                width="70px"
+                @click="fullfillCommandAndSendMessage(index, ['Yes', 'No'][j])"
+              >
+                {{ ['Yes', 'No'][j] }}
+              </v-btn>
+            </div>
+          </template>
+        </div>
+      </div>
       <div
         class="message-box-editor"
         :style="{'visibility': editorVisibility}"
       >
         <v-textarea
+          v-model="currentMessage"
           class="text-body-2 pr-16 pb-10"
           solo
           flat
@@ -27,16 +110,18 @@
         <v-img
           src="@/assets/send.svg"
           class="send-icon"
+          title="Send message"
+          @click="sendMessage('message')"
         />
         <div class="action-buttons-container px-1">
           <v-btn
-            v-for="icon in icons"
-            :key="icon"
             icon
             fab
             small
+            title="Send command"
+            @click="sendMessage('command')"
           >
-            <v-icon>{{ icon }}</v-icon>
+            <v-icon>mdi-apple-keyboard-command</v-icon>
           </v-btn>
         </div>
       </div>
@@ -57,7 +142,9 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import UserService from '@/services/user.service';
+import { Vue, Component, Inject } from 'vue-property-decorator';
+import MessageService from '../services/message.service';
 
 @Component({})
 
@@ -72,13 +159,52 @@ export default class ChatWindow extends Vue {
 
   editorVisibility = 'hidden'
 
-  icons = ['mdi-calendar-blank', 'mdi-map', 'mdi-star', 'mdi-close-circle']
+  currentMessage = ''
+
+  days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+
+  @Inject('$userService')
+  userService!: UserService
+
+  messageService = MessageService.getInstance()
+
+  get messages(): Array<{ author: string; message: string;}> {
+    return this.messageService.messages;
+  }
+
+  get commands(): Array<{ isComplete:boolean, author: string; command:
+    { type: 'date'; data: string }|{ type: 'map'; data: { lat: number; lng: number; } }|
+    { type: 'rate'; data: Array<number> }|{ type: 'complete'; data: Array<string> };}> {
+    return this.messageService.commands;
+  }
+
+  // mounted(): void {
+  //   this.messageService.getMessage()
+  //     .subscribe((message: { message: string; author: string; }) => {
+  //     console.log('message', message);
+  //   });
+  // }
 
   toggleDisplay(): void {
     this.boxVisibility = this.boxVisibility === '0' ? '600px' : '0';
     this.iconOffset = this.iconOffset === '20px' ? '505px' : '20px';
     this.headerHeight = this.headerHeight === '0' ? '60px' : '0';
     this.editorVisibility = this.editorVisibility === 'hidden' ? 'visible' : 'hidden';
+  }
+
+  sendMessage(type = 'message', body = ''): void {
+    if (type === 'command' || body || this.currentMessage) {
+      this.messageService.sendMessage(
+        { author: this.userService.username, message: body || this.currentMessage },
+        type,
+      );
+      this.currentMessage = '';
+    }
+  }
+
+  fullfillCommandAndSendMessage(commandIndex: number, widgetMessage: string): void {
+    this.messageService.commands[commandIndex].isComplete = true;
+    this.sendMessage('message', widgetMessage);
   }
 }
 </script>
@@ -106,6 +232,51 @@ export default class ChatWindow extends Vue {
     }
     .message-box-content {
       background-color: #F0F0F0;
+      overflow: auto;
+      .align-self-end {
+        align-self: flex-end;
+      }
+      .talktext {
+        text-align: left;
+        line-height: 1.5em;
+      }
+      .talk-bubble {
+        display: inline-block;
+        position: relative;
+        max-width: 350px;
+        height: auto;
+      }
+      .tri-right.left-top:after{
+        content: ' ';
+        position: absolute;
+        width: 0;
+        height: 0;
+        left: -20px;
+        right: auto;
+        top: 0px;
+        bottom: auto;
+        border: 22px solid;
+        border-color: white transparent transparent transparent;
+      }
+      .tri-right.right-top:after{
+        content: ' ';
+        position: absolute;
+        width: 0;
+        height: 0;
+        left: auto;
+        right: -20px;
+        top: 0px;
+        bottom: auto;
+        border: 20px solid;
+        border-color: #c8d8ea transparent transparent transparent;
+      }
+      .talktext p {
+        -webkit-margin-before: 0em;
+        -webkit-margin-after: 0em;
+        span {
+          word-wrap: break-word;
+        }
+      }
     }
     .message-box-editor {
       position: relative;
@@ -115,6 +286,7 @@ export default class ChatWindow extends Vue {
         position: absolute;
         right: 30px;
         bottom: 38px;
+        cursor: pointer;
       }
     }
     .action-buttons-container {

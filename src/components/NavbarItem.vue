@@ -9,7 +9,8 @@
     <div class="d-flex align-center">
       <v-img
         src="@/assets/logo.svg"
-        height="73px"
+        contain
+        height="100px"
       />
     </div>
 
@@ -23,7 +24,7 @@
     />
 
     <v-dialog
-      v-if="1"
+      v-if="!userService.isLoggedIn"
       transition="dialog-top-transition"
       width="922"
       overlay-opacity="0.8"
@@ -46,14 +47,18 @@
     <v-btn
       v-else
       icon
+      @click="userService.logout()"
     >
-      <v-icon>mdi-export</v-icon>
+      <v-icon>
+        mdi-export
+      </v-icon>
     </v-btn>
   </v-app-bar>
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import UserService from '@/services/user.service';
+import { Vue, Component, Inject } from 'vue-property-decorator';
 import LoginModal from './LoginModal.vue';
 
 @Component({
@@ -64,6 +69,9 @@ import LoginModal from './LoginModal.vue';
 
 export default class App extends Vue {
   name = 'NavbatItem'
+
+  @Inject('$userService')
+  userService!: UserService
 
   navigationMenu = ['Home', 'About Us', 'Info', 'Contact']
 }
