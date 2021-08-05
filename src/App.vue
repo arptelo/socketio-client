@@ -6,7 +6,7 @@
       <main-page/>
     </v-main>
 
-    <chat-window />
+    <chat-window v-if="userService.isLoggedIn" />
 
     <footer-item />
   </v-app>
@@ -19,6 +19,9 @@ import LoginModal from './components/LoginModal.vue';
 import NavbarItem from './components/NavbarItem.vue';
 import FooterItem from './components/FooterItem.vue';
 import ChatWindow from './components/ChatWindow.vue';
+import UserService from './services/user.service';
+
+const userService = new UserService();
 
 @Component({
   components: {
@@ -28,10 +31,15 @@ import ChatWindow from './components/ChatWindow.vue';
     FooterItem,
     ChatWindow,
   },
+  provide: {
+    $userService: userService,
+  },
 })
 
 export default class App extends Vue {
   name = 'App'
+
+  userService = userService
 }
 </script>
 

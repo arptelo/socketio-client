@@ -78,7 +78,8 @@
 </template>
 
 <script lang="ts">
-import { Vue, Component } from 'vue-property-decorator';
+import UserService from '@/services/user.service';
+import { Vue, Component, Inject } from 'vue-property-decorator';
 
 @Component({})
 
@@ -103,9 +104,12 @@ export default class LoginModal extends Vue {
     (v: string): boolean|string => (v && v.length >= 6) || 'Password must be more than 6 characters',
   ]
 
+  @Inject('$userService')
+  $userService!: UserService
+
   login(): void {
-    this.logged = true;
-    console.log('logged');
+    this.$userService.login(this.username);
+    this.$emit('click');
   }
 }
 </script>

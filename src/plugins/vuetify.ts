@@ -8,4 +8,11 @@ export default new Vuetify({
   icons: {
     iconfont: 'mdi',
   },
+  theme: {
+    themes: {
+      light: {
+        color_chat_bubble: '#c8d8ea',
+      },
+    },
+  },
 });
